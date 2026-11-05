@@ -469,7 +469,7 @@ The most important lesson is that **small Python concepts can work together to b
 
 Keep practicing, keep building, and keep improving! 🐍
 
-<<<<<<< HEAD
+<<<<<<< 
 ⭐ If you found this project helpful, consider giving the repository a star!
 =======
 
