@@ -3,36 +3,42 @@
         "name": "study python",
         "completed_dates": [
             "2026-11-08"
-        ]
+        ],
+        "start_date": "2026-11-08"
     },
     {
         "name": "study javascript",
         "completed_dates": [
             "2026-11-08"
-        ]
+        ],
+        "start_date": "2026-11-08"
     },
     {
         "name": "study spanish",
         "completed_dates": [
             "2026-11-08"
-        ]
+        ],
+        "start_date": "2026-11-08"
     },
     {
         "name": "study italian",
         "completed_dates": [
             "2026-11-08"
-        ]
+        ],
+        "start_date": "2026-11-08"
     },
     {
         "name": "reading a book",
         "completed_dates": [
             "2026-11-08"
-        ]
+        ],
+        "start_date": "2026-11-08"
     },
     {
         "name": "go to gym",
         "completed_dates": [
             "2026-11-08"
-        ]
+        ],
+        "start_date": "2026-11-08"
     }
 ]

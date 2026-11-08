@@ -12,6 +12,23 @@ def get_week_dates():
     return monday, today
 
 
+def show_welcome():
+
+    today = date.today()
+
+    formatted_date = today.strftime("%A, %d %B %Y")
+
+    print("\n" + "=" * 45)
+    print("          WELCOME TO HABIT TRACKER")
+    print("=" * 45)
+
+    print(f"Today is: {formatted_date}")
+    print("Small steps every day lead to big results!")
+
+    print("=" * 45)
+
+
+
 def weekly_report():
     if not habits:
         print("No habits to report yet.")
@@ -49,6 +66,51 @@ def weekly_report():
 
     most_consistent = max(results, key=lambda item: item[1])
     print(f"Most consistent habit: {most_consistent[0]}")
+
+
+
+def habit_history():
+
+    if not habits:
+        print("No habits available!")
+        return
+
+    view_habits()
+
+    try:
+        choice = int(input("\nChoose a habit to view its history: "))
+
+        if choice < 1 or choice > len(habits):
+            print("Invalid habit number!")
+            return
+
+        habit = habits[choice - 1]
+
+        print(f"\n====== {habit['name']} HISTORY ======")
+
+        start = date.fromisoformat(habit["start_date"])
+
+        print("Start date:", start.strftime("%A, %d %B %Y"))
+
+        completed_dates = sorted(set(habit["completed_dates"]))
+
+        if not completed_dates:
+            print("No completed days yet.")
+            return
+
+        print("\nCompletion dates:")
+
+        for day in completed_dates:
+            formatted = date.fromisoformat(day).strftime(
+                "%A, %d %B %Y"
+            )
+            print(f"[✓] {formatted}")
+
+        print(f"\nTotal completed days: {len(completed_dates)}")
+
+    except ValueError:
+        print("Please enter a valid number!")
+
 
 
 
@@ -109,33 +171,51 @@ def save_habits():
 
 
 
+
 def load_habits():
 
-    if os.path.exists("habits.json"):
+    if not os.path.exists("habits.json"):
+        return []
 
-        try:
-            with open("habits.json", "r") as file:
-                data = json.load(file)
+    try:
+        with open("habits.json", "r") as file:
+            data = json.load(file)
 
-            for habit in data:
-                if "completed_dates" not in habit:
-
-                    # Old data cannot tell us the actual date.
-                    # Preserve its current completed status as today.
-                    if habit.get("completed", False):
-                        habit["completed_dates"] = [get_today()]
-                    else:
-                        habit["completed_dates"] = []
-
-                    del habit["completed"]
-
-            return data
-
-        except json.JSONDecodeError:
-            print("Warning: Your habits file is corrupted!")
+        if not isinstance(data, list):
+            print("Invalid habits file format!")
             return []
 
-    return []
+        changed = False
+
+        for habit in data:
+
+            if "start_date" not in habit:
+                habit["start_date"] = get_today()
+                changed = True
+
+            if "completed_dates" not in habit:
+                # Preserve old completion status during migration.
+                if habit.get("completed", False):
+                    habit["completed_dates"] = [get_today()]
+                else:
+                    habit["completed_dates"] = []
+
+                changed = True
+
+            if "completed" in habit:
+                del habit["completed"]
+                changed = True
+
+        if changed:
+            with open("habits.json", "w") as file:
+                json.dump(data, file, indent=4)
+
+        return data
+
+    except (json.JSONDecodeError, TypeError):
+        print("Warning: Your habits file is invalid!")
+        return []
+
 
 
 
@@ -149,10 +229,13 @@ def add_habit():
         print("Habit name cannot be empty!")
         return
 
+    
     habit = {
-        "name": name,
-        "completed_dates": []
-    }
+      "name": name,
+     "start_date": get_today(),
+     "completed_dates": []
+     }
+
 
     habits.append(habit)
 
@@ -164,7 +247,36 @@ def add_habit():
 
 
 
+  
 def view_habits():
+
+    if not habits:
+        print("You haven't added any habits yet!")
+        return
+
+    today = get_today()
+
+    print("\n========== YOUR HABITS ==========")
+
+    for index, habit in enumerate(habits, start=1):
+
+        if today in habit["completed_dates"]:
+            status = "Completed"
+        else:
+            status = "Not completed"
+
+        current = calculate_current_streak(habit)
+        best = calculate_best_streak(habit)
+
+        start = date.fromisoformat(habit["start_date"])
+        formatted_start = start.strftime("%d %B %Y")
+
+        print(f"\n{index}. {habit['name']}")
+        print(f"   Started: {formatted_start}")
+        print(f"   Status: {status}")
+        print(f"   Current streak: {current} days")
+        print(f"   Best streak: {best} days")
+
 
     if len(habits) == 0:
         print("You haven't added any habits yet!")
@@ -302,6 +414,8 @@ def view_statistics():
 
 
 habits = load_habits()
+show_welcome()
+
 
 
 while True:
@@ -315,8 +429,9 @@ while True:
     print("3. Complete a habit")
     print("4. Delete a habit")
     print("5. View statistics")
-    print("6. Exit")
-    print("7. Weekly Progress Report")
+    print("6. Weekly Progress Report")
+    print("7. View habit history")
+    print("8. Exit")
 
     choice = input("\nChoose an option: ")
 
@@ -334,11 +449,16 @@ while True:
 
     elif choice == "5":
             view_statistics()
+    
     elif choice == "6":
-        print("Thank you for using Habit Tracker!")
-        break
-    elif choice == "7":
          weekly_report()
+
+    elif choice == "7":
+       habit_history()
+
+    elif choice == "8":
+            print("Thank you for using Habit Tracker!")
+            break
 
     else:
         print("Invalid choice! Please select 1-6.")
